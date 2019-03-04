@@ -190,6 +190,16 @@ public interface JobsApi {
     Integer lastStableBuildNumber(@Nullable @PathParam("optionalFolderPath") @ParamParser(OptionalFolderPathParser.class) String optionalFolderPath,
                                   @PathParam("name") String jobName);
 
+
+    @Named("jobs:stop")
+    @Path("{optionalFolderPath}job/{name}/{number}/stop")
+    @Fallback(Fallbacks.NullOnNotFoundOr404.class)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @POST
+    void stop(@Nullable @PathParam("optionalFolderPath") @ParamParser(OptionalFolderPathParser.class) String optionalFolderPath,
+                        @PathParam("name") String jobName,
+                        @PathParam("number") int buildNumber);
+
     @Named("jobs:last-build-timestamp")
     @Path("{optionalFolderPath}job/{name}/lastBuild/buildTimestamp")
     @Fallback(Fallbacks.NullOnNotFoundOr404.class)
