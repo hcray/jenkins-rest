@@ -39,7 +39,7 @@ public class JenkinsAuthenticationFilter implements HttpRequestFilter {
     private final JenkinsApi jenkinsApi;
 
     // key = Crumb, value = true if exception is ResourceNotFoundException false otherwise
-    private static volatile Pair<Crumb, Boolean> crumbPair = null;
+    //private static volatile Pair<Crumb, Boolean> crumbPair = null;
     private static final String CRUMB_HEADER = "Jenkins-Crumb";
     private static final String CRUMB_HEADER_EXPAND = ".crumb";
 
@@ -74,20 +74,13 @@ public class JenkinsAuthenticationFilter implements HttpRequestFilter {
     }
 
     private Pair<Crumb, Boolean> getCrumb() {
-        Pair<Crumb, Boolean> crumbValueInit = JenkinsAuthenticationFilter.crumbPair;
-        if (crumbValueInit == null) {
-            synchronized(this) {
-                crumbValueInit = JenkinsAuthenticationFilter.crumbPair;
-                if (crumbValueInit == null) {
-                    final Crumb crumb = jenkinsApi.crumbIssuerApi().crumb();
-                    if (null != crumb) {
-                        final Boolean isRNFE = crumb.errors().isEmpty()
-                            ? true
-                            : crumb.errors().get(0).exceptionName().endsWith(ResourceNotFoundException.class.getSimpleName());
-                        JenkinsAuthenticationFilter.crumbPair = crumbValueInit = new Pair(crumb, isRNFE);
-                    }
-                }
-            }
+        Pair<Crumb, Boolean> crumbValueInit = null;
+        final Crumb crumb = jenkinsApi.crumbIssuerApi().crumb();
+        if (null != crumb) {
+            final Boolean isRNFE = crumb.errors().isEmpty()
+                ? true
+                : crumb.errors().get(0).exceptionName().endsWith(ResourceNotFoundException.class.getSimpleName());
+            crumbValueInit = new Pair(crumb, isRNFE);
         }
         return crumbValueInit;
     }
@@ -96,13 +89,16 @@ public class JenkinsAuthenticationFilter implements HttpRequestFilter {
     private class Pair<A, B> {
         private final A a;
         private final B b;
+
         public Pair(final A a, final B b) {
             this.a = a;
             this.b = b;
         }
+
         public A getKey() {
             return a;
         }
+
         public B getValue() {
             return b;
         }
